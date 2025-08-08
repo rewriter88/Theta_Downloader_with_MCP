@@ -7,8 +7,45 @@ LOG_FILE="$OUTPUT_DIR/download_progress.log"
 
 mkdir -p "$OUTPUT_DIR"
 
+# Calculate total business days for progress tracking
+calculate_business_days() {
+    local start_year=2016
+    local end_year=2025
+    local total_days=0
+    
+    for year in $(seq $start_year $end_year); do
+        if [ $year -eq 2025 ]; then
+            # Only through August 7, 2025
+            for month in {01..08}; do
+                local days_in_month
+                case $month in
+                    02) days_in_month=28 ;;
+                    04|06|09|11) days_in_month=30 ;;
+                    *) days_in_month=31 ;;
+                esac
+                
+                if [ $month -eq 08 ]; then
+                    days_in_month=7  # Only through August 7
+                fi
+                
+                # Estimate ~70% are business days
+                total_days=$((total_days + (days_in_month * 70 / 100)))
+            done
+        else
+            # Full year estimate: ~260 business days
+            total_days=$((total_days + 260))
+        fi
+    done
+    
+    echo $total_days
+}
+
+TOTAL_ESTIMATED_DAYS=$(calculate_business_days)
+START_TIME=$(date +%s)
+
 echo "QQQ Puts Production Download Started: $(date)" | tee "$LOG_FILE"
 echo "Range: 2016-01-04 to 2025-08-07" | tee -a "$LOG_FILE"
+echo "Estimated business days: $TOTAL_ESTIMATED_DAYS" | tee -a "$LOG_FILE"
 echo "Output: $OUTPUT_DIR" | tee -a "$LOG_FILE"
 
 # Counters
@@ -16,7 +53,7 @@ success=0
 failed=0
 skipped=0
 
-# Download function
+# Download function with progress tracking
 download_date() {
     local date="$1"
     local file="$OUTPUT_DIR/QQQ_P_${date}.json"
@@ -38,12 +75,42 @@ download_date() {
         local size=$(ls -lh "$file" | awk '{print $5}')
         echo "✓ $date complete ($size)" | tee -a "$LOG_FILE"
         ((success++))
+        
+        # Calculate and show progress
+        show_progress
         return 0
     else
         echo "✗ $date failed (exit:$result)" | tee -a "$LOG_FILE"
         rm -f "$file"
         ((failed++))
         return 1
+    fi
+}
+
+# Progress calculation function
+show_progress() {
+    local current_time=$(date +%s)
+    local elapsed=$((current_time - START_TIME))
+    local total_processed=$((success + failed + skipped))
+    
+    if [ $total_processed -gt 0 ] && [ $elapsed -gt 0 ]; then
+        local percentage=$((total_processed * 100 / TOTAL_ESTIMATED_DAYS))
+        local rate=$((total_processed * 3600 / elapsed))  # files per hour
+        local remaining=$((TOTAL_ESTIMATED_DAYS - total_processed))
+        local eta_hours=$((remaining * 3600 / rate))
+        local eta_minutes=$((eta_hours / 60))
+        
+        # Format ETA
+        local eta_text=""
+        if [ $eta_minutes -gt 60 ]; then
+            local hours=$((eta_minutes / 60))
+            local mins=$((eta_minutes % 60))
+            eta_text="${hours}h ${mins}m"
+        else
+            eta_text="${eta_minutes}m"
+        fi
+        
+        echo "PROGRESS: ${percentage}% (${total_processed}/${TOTAL_ESTIMATED_DAYS}) | Rate: ${rate}/hr | ETA: ${eta_text}" | tee -a "$LOG_FILE"
     fi
 }
 
@@ -92,13 +159,6 @@ while [ $current_year -le 2025 ]; do
             dow=$(date -j -f "%Y%m%d" "$current_date" "+%u" 2>/dev/null || echo "1")
             if [ $dow -le 5 ]; then  # Monday=1, Friday=5
                 download_date "$current_date"
-                
-                # Progress update every 20 downloads
-                total=$((success + failed))
-                if [ $((total % 20)) -eq 0 ] && [ $total -gt 0 ]; then
-                    echo "Progress: $success success, $failed failed, $skipped skipped" | tee -a "$LOG_FILE"
-                    echo "Current date: $current_date" | tee -a "$LOG_FILE"
-                fi
                 
                 # Brief pause
                 sleep 0.5
