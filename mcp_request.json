@@ -1,0 +1,3 @@
+{
+  "text": "Provide complete one-minute options data for symbol QQQ, puts only (right=P), from 2016-01-01 through 2025-08-07. Include all available fields: bids, asks, bid_size, ask_size, trade_price, trade_size, volume, open_interest, implied_volatility, delta, gamma, theta, vega, rho. Format as CSV. Batch by expiration dates to handle large dataset efficiently."
+}

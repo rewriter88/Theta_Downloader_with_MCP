@@ -1,0 +1,11 @@
+{
+  "mcpsx.servers": [
+    {
+      "id": "theta-data",
+      "name": "Theta Data MCP",
+      "type": "sse",
+      "url": "http://localhost:25503/mcp/sse",
+      "enabled": true
+    }
+  ]
+}

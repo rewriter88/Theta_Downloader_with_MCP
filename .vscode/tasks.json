@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Theta Terminal (MCP)",
+			"type": "shell",
+			"command": "/opt/homebrew/opt/openjdk@21/bin/java -jar ThetaTerminalv3.jar --creds-file creds.txt",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Start Theta Terminal (MCP)",
+			"type": "shell",
+			"command": "/opt/homebrew/opt/openjdk@21/bin/java -jar ThetaTerminalv3.jar --creds-file creds.txt",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

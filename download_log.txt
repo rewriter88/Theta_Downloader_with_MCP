@@ -1,0 +1,4 @@
+Starting QQQ Puts download from 2016-01-04 to 2025-08-07
+Output directory: /Volumes/SSD 4TB/Theta Terminal/QQQ/2025-08-08
+Testing connection...
+ERROR: Cannot connect to Theta Terminal at http://localhost:25503/v3/option/history/quote

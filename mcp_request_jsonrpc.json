@@ -1,0 +1,17 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "download_option_data",
+    "arguments": {
+      "symbol": "QQQ",
+      "right": "P",
+      "start_date": "2016-01-01", 
+      "end_date": "2025-08-07",
+      "resolution": "1min",
+      "fields": ["bid", "ask", "bid_size", "ask_size", "trade_price", "trade_size", "volume", "open_interest", "implied_volatility", "delta", "gamma", "theta", "vega", "rho"],
+      "format": "csv"
+    }
+  }
+}
